@@ -186,7 +186,55 @@ async function run() {
       res.send(review)
     })
 
-    
+    /******payment get way to send payment/CheckOutForm.js********/
+    app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+      const order = req.body;
+      const price = order.price;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
+      });
+      res.send({ clientSecret: paymentIntent.client_secret })
+    });
+
+
+    /******store payment********/
+    app.patch('/orderId/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const query = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId,
+        }
+      }
+      const updatedBooking = await orderCollection.updateOne(query, updatedDoc);
+      const result = await paymentCollection.insertOne(payment);
+      res.send(updatedDoc)
+    })
+
+    /******get profile data ********/
+    app.get('/profile/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const result = await userCollection.findOne(filter);
+      res.send(result)
+    })
+    /******update Profile ********/
+    app.put('/updateuser', async (req, res) => {
+      const user = req.body;
+      const email = user.email;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result)
+    })
 
   }
   finally {
