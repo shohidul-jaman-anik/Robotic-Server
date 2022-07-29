@@ -82,6 +82,32 @@ jwt.verify(token,process.env.ACCESS_TOKEN_SECRET, function(err, decoded) {
          res.send(getOneProduct)
       })
   
+/******get userorder information sent backend********/
+app.post('/order',async(req,res)=>{
+  const order = req.body;
+  const result = await  orderCollection.insertOne(order );
+  res.send(result)
+})
+// ----------get all order---------
+app.get("/orders",async(req,res)=>{
+  const query = {};
+  const cursor = orderCollection.find(query);
+  const order = await cursor.toArray();
+  res.send(order);
+})
+/******show per user order by email********/
+app.get('/order',verifyJWT,async(req,res)=>{
+  const userEmail = req.query.userEmail;
+  const decodedEmail = req.decoded.email;
+  if(userEmail===decodedEmail){
+    const query ={userEmail:userEmail};
+    const order =await orderCollection.find(query).toArray();
+    return res.send(order)
+  }else{
+    return res.status(403).send({message:'forbiden'})
+  }
+
+})
 
     }
     finally {
