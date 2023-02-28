@@ -17,7 +17,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 async function run() {
   try {
-    await client.connect();
+    client.connect();
     const productCollection = client.db("Robotic").collection("product");
     const orderCollection = client.db("Robotic").collection("order");
     const userCollection = client.db("Robotic").collection("user");
@@ -247,7 +247,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-  res.send('Hello From Roboctic World https://vast-tor-95198.herokuapp.com/!!')
+  res.send('Hello From Roboctic World !')
 })
 
 app.listen(port, () => {
